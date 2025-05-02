@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -30,5 +31,23 @@ public class RedisUtil {
 
     public void deleteData(String key) {
         redisTemplate.delete(key);
+    }
+
+
+    // zset
+    public void addZSetScore(String key, String member, double score) {
+        redisTemplate.opsForZSet().add(key, member, score);
+    }
+
+    public Set<Object> getZSetTop(String key, long start, long end) {
+        return redisTemplate.opsForZSet().reverseRange(key, start, end);
+    }
+
+    public Long getZSetRank(String key, String member) {
+        return redisTemplate.opsForZSet().reverseRank(key, member);
+    }
+
+    public Double getZSetScore(String key, String member) {
+        return redisTemplate.opsForZSet().score(key, member);
     }
 }
