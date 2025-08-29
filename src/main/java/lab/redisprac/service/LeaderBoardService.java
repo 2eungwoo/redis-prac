@@ -2,6 +2,7 @@ package lab.redisprac.service;
 
 import lab.redisprac.dto.RankingInfo;
 import lab.redisprac.exception.LeaderBoardOperationException;
+import lab.redisprac.repository.LeaderBoardRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.ZSetOperations;
@@ -17,12 +18,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class LeaderBoardService {
 
-    private final ZSetOperations<String, Object> zSetOperations;
+    private final LeaderBoardRepository leaderBoardRepository;
     private static final String LEADERBOARD_KEY = "game:leaderboard";
 
     public void addScore(String userId, double score) {
         try {
-            zSetOperations.add(LEADERBOARD_KEY, userId, score);
+            leaderBoardRepository.addZSetScore(LEADERBOARD_KEY, userId, score);
             log.info("Score added for user: {} with score: {}", userId, score);
         } catch (Exception e) {
             throw new LeaderBoardOperationException("Failed to add score for user: " + userId, e);
@@ -31,7 +32,7 @@ public class LeaderBoardService {
 
     public List<RankingInfo> getTopPlayers(int count) {
         try {
-            Set<ZSetOperations.TypedTuple<Object>> topScores = zSetOperations.reverseRangeWithScores(LEADERBOARD_KEY, 0, count - 1);
+            Set<ZSetOperations.TypedTuple<Object>> topScores = leaderBoardRepository.getZSetTopWithScores(LEADERBOARD_KEY, 0, count - 1);
             if (topScores == null) {
                 return Collections.emptyList();
             }
@@ -45,7 +46,7 @@ public class LeaderBoardService {
 
     public Long getUserRank(String userId) {
         try {
-            return zSetOperations.reverseRank(LEADERBOARD_KEY, userId);
+            return leaderBoardRepository.getZSetRank(LEADERBOARD_KEY, userId);
         } catch (Exception e) {
             throw new LeaderBoardOperationException("Failed to get rank for user: " + userId, e);
         }
@@ -53,7 +54,7 @@ public class LeaderBoardService {
 
     public Double getUserScore(String userId) {
         try {
-            return zSetOperations.score(LEADERBOARD_KEY, userId);
+            return leaderBoardRepository.getZSetScore(LEADERBOARD_KEY, userId);
         } catch (Exception e) {
             throw new LeaderBoardOperationException("Failed to get score for user: " + userId, e);
         }

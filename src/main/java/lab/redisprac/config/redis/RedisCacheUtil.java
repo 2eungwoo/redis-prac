@@ -1,13 +1,14 @@
 package lab.redisprac.config.redis;
 
 import java.util.concurrent.TimeUnit;
+import lab.redisprac.repository.CacheRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class RedisCacheUtil {
+public class RedisCacheUtil implements CacheRepository {
 
     private final RedisTemplate<String, Object> redisTemplate;
 

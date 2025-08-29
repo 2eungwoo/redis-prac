@@ -1,24 +1,10 @@
 package lab.redisprac.repository;
 
-import lab.redisprac.config.redis.RedisCacheUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+public interface CacheRepository {
 
-@Repository
-@RequiredArgsConstructor
-public class CacheRepository {
+    void setDataExpire(String key, Object value, long duration);
 
-    private final RedisCacheUtil redisCacheUtil;
+    Object getData(String key);
 
-    public void setDataExpire(String key, Object value, long duration) {
-        redisCacheUtil.setDataExpire(key, value, duration);
-    }
-
-    public Object getData(String key) {
-        return redisCacheUtil.getData(key);
-    }
-
-    public void deleteData(String key) {
-        redisCacheUtil.deleteData(key);
-    }
+    void deleteData(String key);
 }

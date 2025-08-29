@@ -1,29 +1,17 @@
 package lab.redisprac.repository;
 
 import java.util.Set;
-import lab.redisprac.config.redis.RedisZSetUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.redis.core.ZSetOperations;
 
-@Repository
-@RequiredArgsConstructor
-public class LeaderBoardRepository {
+public interface LeaderBoardRepository {
 
-    private final RedisZSetUtil redisZSetUtil;
+    void addZSetScore(String key, Object member, double score);
 
-    public void addZSetScore(String key, Object member, double score) {
-        redisZSetUtil.addZSetScore(key, member, score);
-    }
+    Set<Object> getZSetTop(String key, long start, long end);
 
-    public Set<Object> getZSetTop(String key, long start, long end) {
-        return redisZSetUtil.getZSetTop(key, start, end);
-    }
+    Set<ZSetOperations.TypedTuple<Object>> getZSetTopWithScores(String key, long start, long end);
 
-    public Long getZSetRank(String key, Object member) {
-        return redisZSetUtil.getZSetRank(key, member);
-    }
+    Long getZSetRank(String key, Object member);
 
-    public Double getZSetScore(String key, Object member) {
-        return redisZSetUtil.getZSetScore(key, member);
-    }
+    Double getZSetScore(String key, Object member);
 }
