@@ -1,1 +1,8 @@
-[note](http://nonstop-snapper-a75.notion.site/Redis-1e71f679d4cb80f6803ddd1f7c7efca0?pvs=74)
+## redis-prac
+> A repository for practicing with Redis features like leaderboards and caching using Spring Boot.
+
+## note
+> [link]()
+
+## etc
+> updated in 2025.08.29
