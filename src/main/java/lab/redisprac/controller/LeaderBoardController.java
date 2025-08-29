@@ -1,4 +1,4 @@
-package lab.redisprac.config.controller;
+package lab.redisprac.controller;
 
 import lab.redisprac.service.LeaderBoardService;
 import lombok.RequiredArgsConstructor;
