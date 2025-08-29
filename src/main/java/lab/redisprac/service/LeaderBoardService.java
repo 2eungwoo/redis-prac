@@ -1,37 +1,61 @@
 package lab.redisprac.service;
 
-import java.util.ArrayList;
+import lab.redisprac.dto.RankingInfo;
+import lab.redisprac.exception.LeaderBoardOperationException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.ZSetOperations;
+import org.springframework.stereotype.Service;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import lab.redisprac.repository.LeaderBoardRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class LeaderBoardService {
 
-    private final LeaderBoardRepository leaderBoardRepository;
+    private final ZSetOperations<String, Object> zSetOperations;
     private static final String LEADERBOARD_KEY = "game:leaderboard";
 
     public void addScore(String userId, double score) {
-        leaderBoardRepository.addZSetScore(LEADERBOARD_KEY, userId, score);
-        log.info("Score added for user: {} with score: {}", userId, score);
+        try {
+            zSetOperations.add(LEADERBOARD_KEY, userId, score);
+            log.info("Score added for user: {} with score: {}", userId, score);
+        } catch (Exception e) {
+            throw new LeaderBoardOperationException("Failed to add score for user: " + userId, e);
+        }
     }
 
-    public List<?> getTopPlayers(int count) {
-        Set<?> topScores = leaderBoardRepository.getZSetTop(LEADERBOARD_KEY, 0, count - 1);
-        return new ArrayList<>(topScores != null ? topScores : Collections.emptySet());
+    public List<RankingInfo> getTopPlayers(int count) {
+        try {
+            Set<ZSetOperations.TypedTuple<Object>> topScores = zSetOperations.reverseRangeWithScores(LEADERBOARD_KEY, 0, count - 1);
+            if (topScores == null) {
+                return Collections.emptyList();
+            }
+            return topScores.stream()
+                .map(tuple -> new RankingInfo(String.valueOf(tuple.getValue()), tuple.getScore()))
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new LeaderBoardOperationException("Failed to get top players", e);
+        }
     }
 
     public Long getUserRank(String userId) {
-        return leaderBoardRepository.getZSetRank(LEADERBOARD_KEY, userId);
+        try {
+            return zSetOperations.reverseRank(LEADERBOARD_KEY, userId);
+        } catch (Exception e) {
+            throw new LeaderBoardOperationException("Failed to get rank for user: " + userId, e);
+        }
     }
 
     public Double getUserScore(String userId) {
-        return leaderBoardRepository.getZSetScore(LEADERBOARD_KEY, userId);
+        try {
+            return zSetOperations.score(LEADERBOARD_KEY, userId);
+        } catch (Exception e) {
+            throw new LeaderBoardOperationException("Failed to get score for user: " + userId, e);
+        }
     }
 }
